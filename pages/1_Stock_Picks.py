@@ -30,7 +30,7 @@ st.header(f"{r['direction'].title()} {r['ticker']}: {r['name']}")
 if pick.get("headline"):
     st.markdown(f"**{pick['headline']}**")
 st.caption(
-    f"Entered {r['entered']:%B %d, %Y} · Published {r['published']:%B %d, %Y} · Status: {r['status'].title()}"
+    f"Entered {r['entered']:%B %d, %Y} · Status: {r['status'].title()}"
     + (f" · Closed {r['closed']:%B %d, %Y}" if r["closed"] else "")
     + (f" · Horizon: {pick['horizon']}" if pick.get("horizon") else "")
 )
@@ -42,12 +42,6 @@ c3.metric("Return", sc.pct(r["return"]))
 c4.metric("Vs. S&P 500", sc.pct(r["vs_spy"]))
 c5.metric("Target", sc.money(r["target"]) if r["target"] else "–")
 c6.metric("Stop", sc.money(r["stop"]) if r["stop"] else "–")
-if r["backfilled"]:
-    st.info(
-        f"Added after the fact: this position was entered on {r['entered']:%B %d, %Y}"
-        + (f" and closed on {r['closed']:%B %d, %Y}" if r["closed"] else "")
-        + f", before it was published here on {r['published']:%B %d, %Y}."
-    )
 if r["note"]:
     st.warning(r["note"])
 
@@ -55,6 +49,7 @@ if r["note"]:
 if prices is not None and r["ticker"] in prices.columns and r["entry_date"]:
     s = prices[r["ticker"]].dropna()
     s = s[(s.index >= pd.Timestamp(r["entry_date"])) & (s.index <= pd.Timestamp(r["last_date"]))]
+if prices is not None and r["ticker"] in prices.columns and r["entry_date"] and not s.empty:
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=s.index, y=s.values, name=r["ticker"], line=dict(width=2.5)))
     fig.add_hline(y=r["entry"], line_dash="dot", line_color="gray", annotation_text="Entry")

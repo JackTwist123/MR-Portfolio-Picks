@@ -31,7 +31,7 @@ def bond_ideas() -> list[dict]:
     return lib.load_picks(lib.BOND_DIR)
 
 
-@st.cache_data(ttl=3600, show_spinner="Loading prices...")
+@st.cache_data(ttl=900, show_spinner="Loading prices...")
 def prices_for(tickers: tuple[str, ...], start: dt.date):
     return lib.fetch_prices(list(tickers), start)
 
@@ -42,7 +42,7 @@ def scored_stock_picks() -> tuple[list[dict], object]:
     if not picks:
         return [], None
     tickers = tuple(sorted({str(p["ticker"]).upper() for p in picks} | {lib.BENCHMARK}))
-    start = min(lib.to_date(p.get("entered") or p["published"]) for p in picks)
+    start = min(lib.entry_date_of(p) for p in picks)
     try:
         prices = prices_for(tickers, start)
     except Exception as e:

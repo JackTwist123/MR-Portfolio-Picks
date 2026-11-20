@@ -10,7 +10,7 @@ sc.setup("Scoreboard")
 st.title(sc.SITE_TITLE)
 st.write(
     "My stock picks and credit ideas, each published with a dated thesis. "
-    "Stock returns are tracked live against the S&P 500 from the first close after publishing. "
+    "Open picks update with live prices, and every return is compared with the S&P 500 over the same dates. "
     "Every pick stays on the record, winners and losers."
 )
 
@@ -35,7 +35,6 @@ def table(rows):
         "Company": r["name"],
         "Call": r["direction"].title(),
         "Entered": r["entered"],
-        "Logged": "Added after the fact" if r["backfilled"] else "Live",
         "Entry": sc.money(r["entry"]),
         "Current / exit": sc.money(r["last"]),
         "Return": sc.pct(r["return"]),
@@ -62,11 +61,5 @@ if closed_rows:
 else:
     st.caption("None yet.")
 
-n_back = sum(r["backfilled"] for r in scored)
-if n_back:
-    st.caption(
-        f"\"Added after the fact\" marks {n_back} pick(s) entered before this site existed and published later. "
-        "They're included in the stats above. \"Live\" picks were published before or on the entry date."
-    )
 st.caption("Read the full thesis for any pick on the Stock Picks page. Credit ideas are on their own page.")
 sc.footer()

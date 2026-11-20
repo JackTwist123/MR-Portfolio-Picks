@@ -56,6 +56,11 @@ def to_date(value) -> dt.date | None:
     return dt.date.fromisoformat(str(value).strip())
 
 
+def entry_date_of(pick: dict) -> dt.date:
+    """The date a position was entered: `entered` if set, otherwise `published`."""
+    return to_date(pick.get("entered")) or to_date(pick.get("published"))
+
+
 def split_closing_note(body: str) -> tuple[str, str]:
     """
     Separate the closing note from the rest of the pick.
@@ -116,8 +121,8 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
     """
     Work out a stock pick's entry, current/exit price and returns.
 
-    - Entry = first close on or after the entry date: `entered` if set, otherwise the
-      published date (or entry_price if you set one).
+    - Entry = your entry_price if set, otherwise the first close on or after the entry
+      date (`entered`, or `published` if there's no entered date).
     - Exit  = close on the exit date (`exited` or `closed`) for closed picks (or exit_price if set);
               otherwise the latest close.
     - Shorts gain when the price falls.
@@ -127,11 +132,9 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
     ticker = str(pick["ticker"]).upper()
     direction = str(pick.get("direction", "long")).lower()
     status = str(pick.get("status", "open")).lower()
-    published = to_date(pick["published"])
-    entered = to_date(pick.get("entered")) or published
+    published = to_date(pick.get("published"))
+    entered = entry_date_of(pick)
     closed = to_date(pick.get("exited") or pick.get("closed")) if status == "closed" else None
-    # A pick entered before it was published was added to the site after the fact.
-    backfilled = entered < published
 
     out = {
         "slug": pick["slug"],
@@ -141,7 +144,6 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
         "status": status,
         "published": published,
         "entered": entered,
-        "backfilled": backfilled,
         "closed": closed,
         "target": pick.get("target"),
         "stop": pick.get("stop"),
@@ -151,11 +153,33 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
         "note": "",
     }
 
-    if ticker not in prices.columns or BENCHMARK not in prices.columns:
+    if BENCHMARK not in prices.columns:
         out["note"] = "No price data"
         return out
+    spy = prices[BENCHMARK]
 
-    px, spy = prices[ticker], prices[BENCHMARK]
+    has_prices = ticker in prices.columns and not prices[ticker].dropna().empty
+    if not has_prices:
+        # No market data (e.g. delisted or acquired). A closed pick can still be
+        # scored from the entry and exit prices written in the file.
+        if status == "closed" and pick.get("entry_price") and pick.get("exit_price") and closed:
+            entry_px, last_px = float(pick["entry_price"]), float(pick["exit_price"])
+            raw = last_px / entry_px - 1
+            ret = raw if direction == "long" else -raw
+            spy_entry = close_on_or_after(spy, entered)
+            spy_last = close_on_or_before(spy, closed)
+            spy_ret = spy_last[1] / spy_entry[1] - 1 if spy_entry and spy_last else None
+            out.update({
+                "entry": entry_px, "entry_date": entered,
+                "last": last_px, "last_date": closed,
+                "return": ret, "spy_return": spy_ret,
+                "vs_spy": ret - spy_ret if spy_ret is not None else None,
+            })
+        else:
+            out["note"] = "No price data for this ticker"
+        return out
+
+    px = prices[ticker]
 
     entry = close_on_or_after(px, entered)
     if entry is None:

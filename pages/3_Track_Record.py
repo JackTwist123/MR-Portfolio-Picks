@@ -26,8 +26,6 @@ c3.metric("Average vs. S&P 500", sc.pct(stats["avg_vs_spy"]))
 for r in closed:
     st.subheader(f"{r['direction'].title()} {r['ticker']}: {sc.pct(r['return'])} (S&P 500 {sc.pct(r['spy_return'])})")
     dates = f"Entered {r['entered']:%b %d, %Y}" + (f" · Closed {r['closed']:%b %d, %Y}" if r["closed"] else "")
-    if r["backfilled"]:
-        dates += f" · Added after the fact (published {r['published']:%b %d, %Y})"
     st.caption(dates)
     _, note = sc.lib.split_closing_note(picks[r["slug"]]["body"])
     st.markdown(note or "_Closing note to come._")

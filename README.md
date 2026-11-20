@@ -1,6 +1,6 @@
 # MR Portfolio Picks
 
-A public record of my stock picks and credit ideas. Every pick is published with a dated thesis, and stock picks are tracked live against the S&P 500 from the first market close after publishing. Winners and losers both stay on the record.
+A public record of my stock picks and credit ideas. Every pick has a written thesis and its actual entry and exit, and open stock picks update live against the S&P 500. Winners and losers both stay on the record.
 
 ## What's on the site
 
@@ -14,11 +14,11 @@ A public record of my stock picks and credit ideas. Every pick is published with
 
 ## How picks are measured
 
-- **Entry price** is the first close on or after the publish date, set automatically.
-- **Return** runs from entry to the latest close, or to the exit for closed picks. Shorts gain when the price falls.
+- **Entry and exit** are my actual trade dates and prices. If a price isn't listed, that day's close is used.
+- **Return** runs from entry to the latest close for open picks, or to the exit for closed picks. Shorts gain when the price falls.
 - **Vs. S&P 500** compares each pick with SPY over exactly the same dates.
-- Prices are split- and dividend-adjusted, from Yahoo Finance.
-- Git history timestamps every pick, and no pick is ever removed.
+- Market prices come from Yahoo Finance. Closed picks in stocks that no longer trade are scored from their recorded prices.
+- Winners and losers both stay on the record.
 
 ## Each stock pitch covers
 
@@ -31,7 +31,7 @@ A public record of my stock picks and credit ideas. Every pick is published with
 
 ## Adding a pick
 
-Copy `picks/stocks/_TEMPLATE.md`, rename it (for example `fun-2026-11.md`), fill it in and commit. The site picks it up automatically.
+Copy `picks/stocks/_TEMPLATE.md`, rename it (for example `fun-2026-10.md`), fill in the entry date and price, and commit. For a closed pick, set `status: closed` and add `exited` and `exit_price`. The site picks it up automatically.
 
 ## Project structure
 

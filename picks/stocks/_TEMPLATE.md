@@ -1,23 +1,19 @@
 ---
-# Copy this file, rename it (e.g. fun-2026-11.md), and fill it in.
+# Copy this file, rename it (e.g. fun-2026-10.md), and fill it in.
 # Files starting with _ are ignored by the site, so this template never shows up.
 ticker: FUN
 name: Six Flags Entertainment
 direction: long            # long or short
-published: 2026-11-24      # the day you publish; entry = first close on or after this date
+entered: 2026-10-23        # the day you entered the position
+entry_price: 6.77          # your actual entry price (leave blank to use that day's close)
 headline: One sentence that states the call and the main reason.
-target: 0.00               # price target
-stop: 0.00                 # price where you'd admit you're wrong
+target: 11.92              # price target
+stop: 5.50                 # price where you'd admit you're wrong
 horizon: 12 months
 status: open               # open or closed
 # When you close a pick, change status to closed and add:
-# closed: 2027-05-01
-#
-# Only for a trade you made BEFORE publishing it here (shown as "Added after the fact"):
-# entered: 2026-10-23    the real entry date
-# entry_price: 0.00      your actual fill
-# exited: 2026-11-18     instead of closed:, the real exit date
-# (optional) exit_price: 0.00   only if you want a specific exit price instead of that day's close
+# exited: 2026-11-18       the day you exited
+# exit_price: 11.88        your actual exit price (leave blank to use that day's close)
 ---
 
 ## The call
@@ -47,7 +43,7 @@ How you got to the target. For example: 15x 2027E EPS of $4.00 = $60 target, vs.
 - **I'm wrong if:** ___
 
 <!--
-When you close the pick, add this section at the very end:
+When you close the pick, add this section:
 
 ## Closing note
 
