@@ -12,6 +12,11 @@ horizon: 12 months
 status: open               # open or closed
 # When you close a pick, change status to closed and add:
 # closed: 2027-05-01
+#
+# Only for a trade you made BEFORE publishing it here (shown as "Added after the fact"):
+# entered: 2026-10-23    the real entry date
+# entry_price: 0.00      your actual fill
+# exited: 2026-11-18     instead of closed:, the real exit date
 # (optional) exit_price: 0.00   only if you want a specific exit price instead of that day's close
 ---
 

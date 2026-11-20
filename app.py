@@ -34,7 +34,8 @@ def table(rows):
         "Ticker": r["ticker"],
         "Company": r["name"],
         "Call": r["direction"].title(),
-        "Published": r["published"],
+        "Entered": r["entered"],
+        "Logged": "Added after the fact" if r["backfilled"] else "Live",
         "Entry": sc.money(r["entry"]),
         "Current / exit": sc.money(r["last"]),
         "Return": sc.pct(r["return"]),
@@ -42,7 +43,7 @@ def table(rows):
         "Vs. S&P": sc.pct(r["vs_spy"]),
         "Target": sc.money(r["target"]) if r["target"] else "–",
         "Stop": sc.money(r["stop"]) if r["stop"] else "–",
-    } for r in sorted(rows, key=lambda r: r["published"], reverse=True)])
+    } for r in sorted(rows, key=lambda r: r["entered"], reverse=True)])
     st.dataframe(df, hide_index=True, use_container_width=True)
 
 
@@ -61,5 +62,11 @@ if closed_rows:
 else:
     st.caption("None yet.")
 
+n_back = sum(r["backfilled"] for r in scored)
+if n_back:
+    st.caption(
+        f"\"Added after the fact\" marks {n_back} pick(s) entered before this site existed and published later. "
+        "They're included in the stats above. \"Live\" picks were published before or on the entry date."
+    )
 st.caption("Read the full thesis for any pick on the Stock Picks page. Credit ideas are on their own page.")
 sc.footer()

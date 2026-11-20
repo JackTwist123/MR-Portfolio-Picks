@@ -42,7 +42,7 @@ def scored_stock_picks() -> tuple[list[dict], object]:
     if not picks:
         return [], None
     tickers = tuple(sorted({str(p["ticker"]).upper() for p in picks} | {lib.BENCHMARK}))
-    start = min(lib.to_date(p["published"]) for p in picks)
+    start = min(lib.to_date(p.get("entered") or p["published"]) for p in picks)
     try:
         prices = prices_for(tickers, start)
     except Exception as e:

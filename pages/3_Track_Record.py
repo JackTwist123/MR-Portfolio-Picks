@@ -10,7 +10,7 @@ st.write("Every closed pick, with the result and an honest look at what I got ri
 
 scored, _ = sc.scored_stock_picks()
 picks = {p["slug"]: p for p in sc.stock_picks()}
-closed = sorted([r for r in scored if r["status"] == "closed"], key=lambda r: r["closed"] or r["published"], reverse=True)
+closed = sorted([r for r in scored if r["status"] == "closed"], key=lambda r: r["closed"] or r["entered"], reverse=True)
 
 if not closed:
     st.info("No closed picks yet. Open picks are on the Scoreboard.")
@@ -25,7 +25,10 @@ c3.metric("Average vs. S&P 500", sc.pct(stats["avg_vs_spy"]))
 
 for r in closed:
     st.subheader(f"{r['direction'].title()} {r['ticker']}: {sc.pct(r['return'])} (S&P 500 {sc.pct(r['spy_return'])})")
-    st.caption(f"Published {r['published']:%b %d, %Y} · Closed {r['closed']:%b %d, %Y}" if r["closed"] else "")
+    dates = f"Entered {r['entered']:%b %d, %Y}" + (f" · Closed {r['closed']:%b %d, %Y}" if r["closed"] else "")
+    if r["backfilled"]:
+        dates += f" · Added after the fact (published {r['published']:%b %d, %Y})"
+    st.caption(dates)
     _, note = sc.lib.split_closing_note(picks[r["slug"]]["body"])
     st.markdown(note or "_Closing note to come._")
     st.divider()

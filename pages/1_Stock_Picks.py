@@ -16,9 +16,9 @@ if not scored:
     st.stop()
 
 picks = {p["slug"]: p for p in sc.stock_picks()}
-ordered = sorted(scored, key=lambda r: r["published"], reverse=True)
+ordered = sorted(scored, key=lambda r: r["entered"], reverse=True)
 labels = {
-    r["slug"]: f"{r['ticker']} · {r['direction'].title()} · {r['published']:%b %d, %Y}"
+    r["slug"]: f"{r['ticker']} · {r['direction'].title()} · {r['entered']:%b %d, %Y}"
     + (" (closed)" if r["status"] == "closed" else "")
     for r in ordered
 }
@@ -30,7 +30,7 @@ st.header(f"{r['direction'].title()} {r['ticker']}: {r['name']}")
 if pick.get("headline"):
     st.markdown(f"**{pick['headline']}**")
 st.caption(
-    f"Published {r['published']:%B %d, %Y} · Status: {r['status'].title()}"
+    f"Entered {r['entered']:%B %d, %Y} · Published {r['published']:%B %d, %Y} · Status: {r['status'].title()}"
     + (f" · Closed {r['closed']:%B %d, %Y}" if r["closed"] else "")
     + (f" · Horizon: {pick['horizon']}" if pick.get("horizon") else "")
 )
@@ -42,6 +42,12 @@ c3.metric("Return", sc.pct(r["return"]))
 c4.metric("Vs. S&P 500", sc.pct(r["vs_spy"]))
 c5.metric("Target", sc.money(r["target"]) if r["target"] else "–")
 c6.metric("Stop", sc.money(r["stop"]) if r["stop"] else "–")
+if r["backfilled"]:
+    st.info(
+        f"Added after the fact: this position was entered on {r['entered']:%B %d, %Y}"
+        + (f" and closed on {r['closed']:%B %d, %Y}" if r["closed"] else "")
+        + f", before it was published here on {r['published']:%B %d, %Y}."
+    )
 if r["note"]:
     st.warning(r["note"])
 

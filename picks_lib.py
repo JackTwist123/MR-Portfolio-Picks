@@ -15,7 +15,7 @@ ROOT = Path(__file__).parent
 STOCK_DIR = ROOT / "picks" / "stocks"
 BOND_DIR = ROOT / "picks" / "bonds"
 BENCHMARK = "SPY"  # S&P 500 ETF, used as the benchmark for every stock pick
-CLOSING_HEADING = "## Closing note"
+CLOSING_HEADINGS = ("## Closing note", "## Position closed")
 
 
 # ------------------------------------------------------------ reading files ---
@@ -57,10 +57,22 @@ def to_date(value) -> dt.date | None:
 
 
 def split_closing_note(body: str) -> tuple[str, str]:
-    """Separate the pitch from the '## Closing note' section, if there is one."""
-    if CLOSING_HEADING in body:
-        pitch, note = body.split(CLOSING_HEADING, 1)
-        return pitch.strip(), note.strip()
+    """
+    Separate the closing note from the rest of the pick.
+
+    The note is the section headed '## Closing note' (or '## Position closed') and runs
+    until the next '## ' heading. Everything else (the pitch, sources...) stays in the pitch.
+    """
+    for heading in CLOSING_HEADINGS:
+        start = body.find(heading)
+        if start == -1:
+            continue
+        after = body[start + len(heading):]
+        nxt = after.find("\n## ")
+        note = after if nxt == -1 else after[:nxt]
+        rest = "" if nxt == -1 else after[nxt:]
+        pitch = (body[:start].rstrip() + "\n\n" + rest.strip()).strip()
+        return pitch, note.strip()
     return body, ""
 
 
@@ -104,8 +116,9 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
     """
     Work out a stock pick's entry, current/exit price and returns.
 
-    - Entry = first close on or after the published date (or entry_price if you set one).
-    - Exit  = close on the closed date for closed picks (or exit_price if set);
+    - Entry = first close on or after the entry date: `entered` if set, otherwise the
+      published date (or entry_price if you set one).
+    - Exit  = close on the exit date (`exited` or `closed`) for closed picks (or exit_price if set);
               otherwise the latest close.
     - Shorts gain when the price falls.
     - The S&P 500 (SPY) return is measured over exactly the same dates.
@@ -115,7 +128,10 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
     direction = str(pick.get("direction", "long")).lower()
     status = str(pick.get("status", "open")).lower()
     published = to_date(pick["published"])
-    closed = to_date(pick.get("closed")) if status == "closed" else None
+    entered = to_date(pick.get("entered")) or published
+    closed = to_date(pick.get("exited") or pick.get("closed")) if status == "closed" else None
+    # A pick entered before it was published was added to the site after the fact.
+    backfilled = entered < published
 
     out = {
         "slug": pick["slug"],
@@ -124,6 +140,8 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
         "direction": direction,
         "status": status,
         "published": published,
+        "entered": entered,
+        "backfilled": backfilled,
         "closed": closed,
         "target": pick.get("target"),
         "stop": pick.get("stop"),
@@ -139,7 +157,7 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
 
     px, spy = prices[ticker], prices[BENCHMARK]
 
-    entry = close_on_or_after(px, published)
+    entry = close_on_or_after(px, entered)
     if entry is None:
         out["note"] = "Waiting for first close after publishing"
         return out
