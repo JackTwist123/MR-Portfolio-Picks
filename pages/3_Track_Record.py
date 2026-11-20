@@ -22,6 +22,10 @@ c1, c2, c3 = st.columns(3)
 c1.metric("Closed picks", stats["count"])
 c2.metric("Hit rate", sc.pct(stats["hit_rate"], signed=False))
 c3.metric("Average vs. S&P 500", sc.pct(stats["avg_vs_spy"]))
+st.caption(
+    f"Based on {stats['count']} pick(s) so far. With a small sample, one or two results can swing the hit rate "
+    "and averages a lot, so expect these numbers to settle as more picks are added over time."
+)
 
 for r in closed:
     st.subheader(f"{r['direction'].title()} {r['ticker']}: {sc.pct(r['return'])} (S&P 500 {sc.pct(r['spy_return'])})")

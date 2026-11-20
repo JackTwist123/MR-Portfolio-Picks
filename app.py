@@ -27,6 +27,10 @@ c1.metric("Stock picks", stats["count"])
 c2.metric("Hit rate", sc.pct(stats["hit_rate"], signed=False), help="Share of picks with a positive return")
 c3.metric("Average return", sc.pct(stats["avg_return"]))
 c4.metric("Average vs. S&P 500", sc.pct(stats["avg_vs_spy"]), help="Pick return minus the S&P 500's return over the same dates")
+st.caption(
+    f"Based on {stats['count']} pick(s) so far. With a small sample, one or two results can swing the hit rate "
+    "and averages a lot, so expect these numbers to settle as more picks are added over time."
+)
 
 
 def table(rows):
