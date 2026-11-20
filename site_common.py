@@ -23,12 +23,10 @@ def setup(page_title: str) -> None:
     st.set_page_config(page_title=f"{page_title} | {OWNER}", page_icon="📈", layout="wide")
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
 def stock_picks() -> list[dict]:
     return lib.load_picks(lib.STOCK_DIR)
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
 def bond_ideas() -> list[dict]:
     return lib.load_picks(lib.BOND_DIR)
 

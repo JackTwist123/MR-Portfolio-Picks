@@ -9,7 +9,7 @@ st.title("About")
 
 st.markdown(f"""
 I'm {sc.OWNER}, a sophomore studying finance at Baruch College's Zicklin School of Business.
-I'm currently a Private Equity Intern and I'm especially interested in fixed income and credit.
+I'm currently a Private Equity Intern, and I'm especially interested in fixed income and credit.
 
 **Also see:** my [Credit & Rates Dashboard]({sc.DASHBOARD_URL}) · [LinkedIn]({sc.LINKEDIN_URL})
 
