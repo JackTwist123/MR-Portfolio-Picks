@@ -183,14 +183,20 @@ def score_stock_pick(pick: dict, prices: pd.DataFrame, today: dt.date | None = N
 
     entry = close_on_or_after(px, entered)
     if entry is None:
-        out["note"] = "Waiting for first close after publishing"
-        return out
+        if not pick.get("entry_price"):
+            out["note"] = "Waiting for the first close after the entry date"
+            return out
+        # Entered today with my own price, before today's close exists.
+        entry = (entered, float(pick["entry_price"]))
     entry_date, entry_px = entry
     if pick.get("entry_price"):
         entry_px = float(pick["entry_price"])
 
     end_day = closed or today
     last = close_on_or_before(px, end_day)
+    if last is None or last[0] < entry_date:
+        # No market close since entry yet: mark the position at its entry price.
+        last = (entry_date, entry_px)
     last_date, last_px = last
     if status == "closed" and pick.get("exit_price"):
         last_px = float(pick["exit_price"])
